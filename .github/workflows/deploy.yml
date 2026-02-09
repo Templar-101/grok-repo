@@ -1,0 +1,38 @@
+name: Terraform Deploy EC2
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::886036506684:role/github-actions-terraform-ec2
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.x
+
+      - run: terraform init
+
+      - run: terraform fmt -check
+
+      - run: terraform validate
+
+      - run: terraform plan -out=plan.tfplan
+
+      # Uncomment later when you want to actually create resources
+      # - run: terraform apply -auto-approve plan.tfplan
